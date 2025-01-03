@@ -12,10 +12,7 @@ const invalid = [
   'https://bitbucket.org/foo',
 ]
 
-// assigning the constructor here is hacky, but the only way to make assertions that compare
-// a subset of properties to a found object pass as you would expect
-const GitHost = require('../lib/git-host')
-const defaults = { constructor: GitHost, type: 'bitbucket', user: 'foo', project: 'bar' }
+const defaults = { type: 'bitbucket', user: 'foo', project: 'bar' }
 
 const valid = {
   // shortucts
@@ -181,16 +178,18 @@ t.test('string methods populate correctly', t => {
   t.equal(parsed.hash(), '', 'hash() returns empty string when committish is unset')
   t.equal(parsed.ssh(), 'git@bitbucket.org:foo/bar.git')
   t.equal(parsed.sshurl(), 'git+ssh://git@bitbucket.org/foo/bar.git')
+  t.equal(parsed.edit(), 'https://bitbucket.org/foo/bar')
+  t.equal(parsed.edit('/lib/index.js'), 'https://bitbucket.org/foo/bar/src/HEAD/lib/index.js?mode=edit')
   t.equal(parsed.browse(), 'https://bitbucket.org/foo/bar')
-  t.equal(parsed.browse('/lib/index.js'), 'https://bitbucket.org/foo/bar/src/master/lib/index.js')
-  t.equal(parsed.browse('/lib/index.js', 'L100'), 'https://bitbucket.org/foo/bar/src/master/lib/index.js#l100')
+  t.equal(parsed.browse('/lib/index.js'), 'https://bitbucket.org/foo/bar/src/HEAD/lib/index.js')
+  t.equal(parsed.browse('/lib/index.js', 'L100'), 'https://bitbucket.org/foo/bar/src/HEAD/lib/index.js#l100')
   t.equal(parsed.docs(), 'https://bitbucket.org/foo/bar#readme')
   t.equal(parsed.https(), 'git+https://bitbucket.org/foo/bar.git')
   t.equal(parsed.shortcut(), 'bitbucket:foo/bar')
   t.equal(parsed.path(), 'foo/bar')
-  t.equal(parsed.tarball(), 'https://bitbucket.org/foo/bar/get/master.tar.gz')
-  t.equal(parsed.file(), 'https://bitbucket.org/foo/bar/raw/master/')
-  t.equal(parsed.file('/lib/index.js'), 'https://bitbucket.org/foo/bar/raw/master/lib/index.js')
+  t.equal(parsed.tarball(), 'https://bitbucket.org/foo/bar/get/HEAD.tar.gz')
+  t.equal(parsed.file(), 'https://bitbucket.org/foo/bar/raw/HEAD/')
+  t.equal(parsed.file('/lib/index.js'), 'https://bitbucket.org/foo/bar/raw/HEAD/lib/index.js')
   t.equal(parsed.bugs(), 'https://bitbucket.org/foo/bar/issues')
 
   t.equal(parsed.docs({ committish: 'fix/bug' }), 'https://bitbucket.org/foo/bar/src/fix%2Fbug#readme', 'allows overriding options')

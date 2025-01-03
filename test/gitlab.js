@@ -13,11 +13,8 @@ const invalid = [
   'https://gitlab.com/foo/bar/repository/archive.tar.gz?ref=49b393e2ded775f2df36ef2ffcb61b0359c194c9',
 ]
 
-// assigning the constructor here is hacky, but the only way to make assertions that compare
-// a subset of properties to a found object pass as you would expect
-const GitHost = require('../lib/git-host')
-const defaults = { constructor: GitHost, type: 'gitlab', user: 'foo', project: 'bar' }
-const subgroup = { constructor: GitHost, type: 'gitlab', user: 'foo/bar', project: 'baz' }
+const defaults = { type: 'gitlab', user: 'foo', project: 'bar' }
+const subgroup = { type: 'gitlab', user: 'foo/bar', project: 'baz' }
 const valid = {
   // shortcuts
   //
@@ -287,16 +284,18 @@ t.test('string methods populate correctly', t => {
   t.equal(parsed.hash(), '', 'hash() returns empty string when committish is unset')
   t.equal(parsed.ssh(), 'git@gitlab.com:foo/bar.git')
   t.equal(parsed.sshurl(), 'git+ssh://git@gitlab.com/foo/bar.git')
+  t.equal(parsed.edit(), 'https://gitlab.com/foo/bar')
+  t.equal(parsed.edit('/lib/index.js'), 'https://gitlab.com/foo/bar/-/edit/HEAD/lib/index.js')
   t.equal(parsed.browse(), 'https://gitlab.com/foo/bar')
-  t.equal(parsed.browse('/lib/index.js'), 'https://gitlab.com/foo/bar/tree/master/lib/index.js')
-  t.equal(parsed.browse('/lib/index.js', 'L100'), 'https://gitlab.com/foo/bar/tree/master/lib/index.js#l100')
+  t.equal(parsed.browse('/lib/index.js'), 'https://gitlab.com/foo/bar/tree/HEAD/lib/index.js')
+  t.equal(parsed.browse('/lib/index.js', 'L100'), 'https://gitlab.com/foo/bar/tree/HEAD/lib/index.js#l100')
   t.equal(parsed.docs(), 'https://gitlab.com/foo/bar#readme')
   t.equal(parsed.https(), 'git+https://gitlab.com/foo/bar.git')
   t.equal(parsed.shortcut(), 'gitlab:foo/bar')
   t.equal(parsed.path(), 'foo/bar')
-  t.equal(parsed.tarball(), 'https://gitlab.com/foo/bar/repository/archive.tar.gz?ref=master')
-  t.equal(parsed.file(), 'https://gitlab.com/foo/bar/raw/master/')
-  t.equal(parsed.file('/lib/index.js'), 'https://gitlab.com/foo/bar/raw/master/lib/index.js')
+  t.equal(parsed.tarball(), 'https://gitlab.com/foo/bar/repository/archive.tar.gz?ref=HEAD')
+  t.equal(parsed.file(), 'https://gitlab.com/foo/bar/raw/HEAD/')
+  t.equal(parsed.file('/lib/index.js'), 'https://gitlab.com/foo/bar/raw/HEAD/lib/index.js')
   t.equal(parsed.bugs(), 'https://gitlab.com/foo/bar/issues')
 
   t.same(parsed.git(), null, 'git() returns null')
